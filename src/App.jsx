@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 
-// ✅ Utility helper to parse and format local airport times directly from the ISO string.
-// This bypasses native JavaScript timezone correction, preventing the automatic +5.5 hour shift.
 const formatLocalTime = (isoString) => {
   if (!isoString) return '—';
   
-  // Example Input: "2026-06-20T12:20:00"
   const parts = isoString.split('T');
   if (parts.length < 2) return isoString;
   
@@ -16,7 +13,7 @@ const formatLocalTime = (isoString) => {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('track'); // 'track' or 'board'
+  const [activeTab, setActiveTab] = useState('track');
   
   // State for Flight Tracking
   const [flightNumber, setFlightNumber] = useState('');
@@ -26,13 +23,12 @@ export default function App() {
 
   // State for Airport Board
   const [airportIata, setAirportIata] = useState('');
-  const [boardType, setBoardType] = useState('dep_iata'); // 'dep_iata' or 'arr_iata'
+  const [boardType, setBoardType] = useState('dep_iata');
   const [boardData, setBoardData] = useState(null);
   const [boardLoading, setBoardLoading] = useState(false);
   const [boardError, setBoardError] = useState('');
 
-  // API Base URL matching your Spring Boot backend
-  const API_BASE = 'http://localhost:7050/api';
+  const API_BASE = 'https://aviationtracker-backend.onrender.com/api';
 
   // Handler to search for a specific flight
   const handleTrackFlight = async (e) => {
