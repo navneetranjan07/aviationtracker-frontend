@@ -8,6 +8,7 @@ export default function RadarMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
     fetch(`${API_BASE}/flights/radar`)
       .then((res) => {

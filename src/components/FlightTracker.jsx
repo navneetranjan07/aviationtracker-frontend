@@ -8,6 +8,7 @@ export default function FlightTracker() {
   const [flightLoading, setFlightLoading] = useState(false);
   const [flightError, setFlightError] = useState('');
 
+
   const handleTrackFlight = async (e) => {
     e.preventDefault();
     if (!flightNumber.trim()) return;

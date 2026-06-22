@@ -17,6 +17,7 @@ export default function AirportBoard() {
     setBoardError('');
     setBoardData(null);
 
+
     try {
       const response = await fetch(
         `${API_BASE}/flights/board/${airportIata.trim().toUpperCase()}?type=${boardType}`
