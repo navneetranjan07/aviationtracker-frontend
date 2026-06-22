@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { formatLocalTime } from '../utils/formatTime';
+import { API_BASE } from '../config';
+
+export default function FlightTracker() {
+  const [flightNumber, setFlightNumber] = useState('');
+  const [flightData, setFlightData] = useState(null);
+  const [flightLoading, setFlightLoading] = useState(false);
+  const [flightError, setFlightError] = useState('');
+
+  const handleTrackFlight = async (e) => {
+    e.preventDefault();
+    if (!flightNumber.trim()) return;
+
+    setFlightLoading(true);
+    setFlightError('');
+    setFlightData(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/flights/${flightNumber.trim().toUpperCase()}`);
+      if (!response.ok) {
+        throw new Error('Flight not found or an error occurred.');
+      }
+      const data = await response.json();
+      setFlightData(data);
+    } catch (err) {
+      setFlightError(err.message || 'Failed to connect to backend.');
+    } finally {
+      setFlightLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl max-w-xl mx-auto">
+        <h2 className="text-xl font-semibold mb-4 text-sky-400">Live Flight Lookup</h2>
+        <form onSubmit={handleTrackFlight} className="flex gap-3">
+          <input
+            type="text"
+            placeholder="e.g., AI101, AA2304"
+            value={flightNumber}
+            onChange={(e) => setFlightNumber(e.target.value)}
+            className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+          />
+          <button
+            type="submit"
+            disabled={flightLoading}
+            className="bg-sky-600 hover:bg-sky-500 disabled:bg-slate-700 text-white font-medium px-6 py-2 rounded-lg transition-colors shadow-md"
+          >
+            {flightLoading ? 'Searching...' : 'Track'}
+          </button>
+        </form>
+        {flightError && (
+          <p className="mt-3 text-red-400 text-sm bg-red-950/40 border border-red-900/50 p-2 rounded-lg">
+            ⚠️ {flightError}
+          </p>
+        )}
+      </div>
+
+      {/* Flight Result Card */}
+      {flightData && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-2xl max-w-3xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-4 mb-6 gap-4">
+            <div>
+              <span className="bg-sky-500/10 text-sky-400 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded border border-sky-500/20">
+                {flightData.airline || 'Unknown Airline'}
+              </span>
+              <h3 className="text-3xl font-black text-white mt-2">{flightData.flightNumber}</h3>
+            </div>
+            <div className="text-right">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${
+                flightData.status?.toLowerCase() === 'active' || flightData.status?.toLowerCase() === 'landed'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              }`}>
+                ● {flightData.status?.toUpperCase() || 'UNKNOWN'}
+              </span>
+            </div>
+          </div>
+
+          {/* Route Visualizer */}
+          <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6 bg-slate-900/50 p-6 rounded-xl border border-slate-700/60 mb-6">
+            <div className="text-center md:text-left">
+              <p className="text-4xl font-extrabold text-sky-400">{flightData.originIata}</p>
+              <p className="text-sm font-semibold text-white mt-1">{flightData.originCity}</p>
+              <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{flightData.originAirport}</p>
+              <p className="text-xs text-slate-500 mt-3">Scheduled Departure</p>
+              <p className="text-sm font-medium text-slate-300">
+                {formatLocalTime(flightData.scheduledDeparture)}
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center justify-center text-slate-500">
+              <div className="w-full flex items-center gap-2">
+                <div className="h-[2px] bg-slate-700 flex-1 border-dashed border-t"></div>
+                <span className="text-xl text-sky-500 animate-pulse">✈️</span>
+                <div className="h-[2px] bg-slate-700 flex-1 border-dashed border-t"></div>
+              </div>
+            </div>
+
+            <div className="text-center md:text-right">
+              <p className="text-4xl font-extrabold text-sky-400">{flightData.destinationIata}</p>
+              <p className="text-sm font-semibold text-white mt-1">{flightData.destinationCity}</p>
+              <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{flightData.destinationAirport}</p>
+              <p className="text-xs text-slate-500 mt-3">Estimated Arrival</p>
+              <p className="text-sm font-medium text-slate-300">
+                {formatLocalTime(flightData.estimatedArrival)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
