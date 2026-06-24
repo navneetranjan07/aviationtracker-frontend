@@ -5,7 +5,7 @@ import { API_BASE } from '../config';
 import 'leaflet/dist/leaflet.css';
 import './RadarMap.css';
 
-// Fix default Leaflet marker resource configuration issues in build pipelines
+// Fix default Leaflet marker asset missing routes in web bundles
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -13,12 +13,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Helper component to change map viewport view programmatically
+// Helper component to reposition and pan map view dynamically
 function ChangeMapView({ center }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
       map.setView(center, map.getZoom());
+      // Invalidate size to guarantee rendering if the screen resized mid-session
+      setTimeout(() => map.invalidateSize(), 200);
     }
   }, [center, map]);
   return null;
@@ -30,7 +32,7 @@ export default function RadarMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Poll backend telemetry matrix every 10 seconds to keep flights updating in real-time
+  // Synchronize telemetry array feed via 10-second polling loops
   useEffect(() => {
     const fetchRadarFeeds = () => {
       fetch(`${API_BASE}/flights/radar`)
@@ -42,7 +44,6 @@ export default function RadarMap() {
           setPlanes(data);
           setLoading(false);
           
-          // Keep selected plane data fresh if it's still in the current scan list
           if (selectedPlane) {
             const updatedMatch = data.find(p => p.flightNumber === selectedPlane.flightNumber);
             if (updatedMatch) setSelectedPlane(updatedMatch);
@@ -60,7 +61,7 @@ export default function RadarMap() {
     return () => clearInterval(pollingInterval);
   }, [selectedPlane]);
 
-  // Dynamically create rotated SVG icons matching heading attributes
+  // Create custom CSS/SVG marker icons rotating dynamically with tracking courses
   const createPlaneIcon = (heading, isTargeted) => {
     return L.divIcon({
       className: 'custom-radar-plane-wrapper',
@@ -84,25 +85,21 @@ export default function RadarMap() {
         )}
         {error && <div className="radar-status-overlay error-msg">⚠️ Link Offline: {error}</div>}
 
-        {/* Leaflet map object initialized over center coordinates of India */}
         <MapContainer 
           center={[20.5937, 78.9629]} 
           zoom={5} 
           scrollWheelZoom={true}
           className="leaflet-map-viewport"
         >
-          {/* CartoDB Dark Matter tile layer for a professional dark radar appearance */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
 
-          {/* Recenter viewport when a specific plan target is locked onto */}
           {selectedPlane && (
             <ChangeMapView center={[selectedPlane.currentLatitude, selectedPlane.currentLongitude]} />
           )}
 
-          {/* Plotting aircraft marker points */}
           {planes.map((plane) => {
             if (!plane.currentLatitude || !plane.currentLongitude) return null;
             const isTargeted = selectedPlane?.flightNumber === plane.flightNumber;
@@ -129,24 +126,25 @@ export default function RadarMap() {
         </MapContainer>
       </div>
 
-      {/* Side specification drawer remains fully operational */}
-      <div className="radar-spec-drawer">
+      <div className={`radar-spec-drawer ${selectedPlane ? 'drawer-active' : ''}`}>
         {selectedPlane ? (
           <div className="spec-card">
             <h3>Target Locked: {selectedPlane.flightNumber}</h3>
             <hr className="spec-divider" />
-            <div className="spec-row"><strong>Feed Source:</strong> <span className="badge-live">LIVE ADS-B</span></div>
-            <div className="spec-row"><strong>Ground Speed:</strong> {Math.round(selectedPlane.speed)} knots</div>
-            <div className="spec-row"><strong>Baro Altitude:</strong> {Math.round(selectedPlane.altitude).toLocaleString()} ft</div>
-            <div className="spec-row"><strong>True Track Course:</strong> {Math.round(selectedPlane.heading)}°</div>
-            <div className="spec-row"><strong>Latitude:</strong> {selectedPlane.currentLatitude?.toFixed(5)}</div>
-            <div className="spec-row"><strong>Longitude:</strong> {selectedPlane.currentLongitude?.toFixed(5)}</div>
+            <div className="spec-grid-container">
+              <div className="spec-row"><strong>Feed Source:</strong> <span className="badge-live">LIVE ADS-B</span></div>
+              <div className="spec-row"><strong>Ground Speed:</strong> {Math.round(selectedPlane.speed)} kts</div>
+              <div className="spec-row"><strong>Baro Altitude:</strong> {Math.round(selectedPlane.altitude).toLocaleString()} ft</div>
+              <div className="spec-row"><strong>True Course:</strong> {Math.round(selectedPlane.heading)}°</div>
+              <div className="spec-row"><strong>Latitude:</strong> {selectedPlane.currentLatitude?.toFixed(4)}</div>
+              <div className="spec-row"><strong>Longitude:</strong> {selectedPlane.currentLongitude?.toFixed(4)}</div>
+            </div>
             <button className="dismiss-btn" onClick={() => setSelectedPlane(null)}>Drop Target</button>
           </div>
         ) : (
           <div className="spec-placeholder">
             <p>📡 System Status: Operational</p>
-            <p className="hint">Click any active vector marker on the real-world tracking map to stream telemetry details.</p>
+            <p className="hint">Select an active aircraft marker vector directly on the tracking map grid to isolate telemetry details.</p>
           </div>
         )}
       </div>

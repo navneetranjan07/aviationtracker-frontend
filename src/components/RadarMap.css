@@ -1,56 +1,58 @@
-/* Core Layout Container */
+/* Core Layout Container with Flexible Display Methods */
 .radar-dashboard-container {
   display: flex;
+  flex-direction: row; /* Desktop horizontal split layout by default */
   width: 100%;
-  height: calc(100vh - 80px); /* Adjust based on your header's true layout height */
+  height: calc(100vh - 64px); /* Adapts fluidly with standard core application headers */
   background-color: #0b0f19;
-  gap: 20px;
-  padding: 20px;
+  gap: 16px;
+  padding: 16px;
   box-sizing: border-box;
 }
 
-/* 1. Force the map container to take all space on the left and never collapse to 0px */
+/* Map Screen Box Wrapper */
 .radar-screen.real-map-mode {
   flex: 1;
   position: relative;
-  height: 100% !important;
+  height: 100%;
   background: #090d14;
   border: 1px solid #1e293b;
   border-radius: 8px;
   overflow: hidden;
 }
 
-/* 2. Critical: Force the Map engine container and inner elements to render completely */
+/* Force standard mapping elements to occupy maximum dimensions */
 .leaflet-map-viewport,
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
-  min-height: 100% !important;
   z-index: 1;
   background-color: #090d14 !important;
 }
 
-/* Marker Styling Framework Fixes */
+/* Clear default background boxes from plane symbols */
 .custom-radar-plane-wrapper {
   background: transparent !important;
   border: none !important;
 }
 
-/* Connection / Error HUD Alerts */
+/* Responsive Network Overlay Status Indicators */
 .radar-status-overlay {
   position: absolute;
-  top: 20px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(10, 15, 26, 0.9);
+  background: rgba(10, 15, 26, 0.95);
   border: 1px solid #00ffcc;
   color: #00ffcc;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 4px;
   z-index: 1000;
   font-family: monospace;
+  font-size: 13px;
+  white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .radar-status-overlay.error-msg {
@@ -58,7 +60,7 @@
   color: #ff3366;
 }
 
-/* Side Drawer Specifications View */
+/* Sidebar Specifications Controller */
 .radar-spec-drawer {
   width: 320px;
   background: #0f172a;
@@ -69,13 +71,16 @@
   flex-direction: column;
   box-sizing: border-box;
   color: #f8fafc;
+  overflow-y: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .spec-card h3 {
   color: #00ffcc;
   margin-top: 0;
   margin-bottom: 12px;
-  font-size: 18px;
+  font-size: 16px;
+  letter-spacing: 0.5px;
 }
 
 .spec-divider {
@@ -84,11 +89,17 @@
   margin-bottom: 16px;
 }
 
+.spec-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .spec-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 14px;
+  align-items: center;
+  font-size: 13px;
   font-family: monospace;
 }
 
@@ -98,10 +109,12 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 11px;
+  font-weight: bold;
 }
 
 .dismiss-btn {
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 16px;
   width: 100%;
   background: #ff3366;
   color: white;
@@ -110,7 +123,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
-  transition: background 0.2s;
+  font-size: 13px;
 }
 
 .dismiss-btn:hover {
@@ -125,13 +138,75 @@
 }
 
 .spec-placeholder .hint {
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 8px;
 }
 
-/* Leaflet Map Text Color Readability Corrections */
 .map-tooltip-popup {
   font-family: monospace;
   color: #0f172a;
+}
+
+/* ==========================================================================
+   📱 COMPACT & SMARTPHONE STYLING SPECIFICATIONS (Media Query Rule)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .radar-dashboard-container {
+    flex-direction: column; /* Stack layout vertically on tablet and mobile viewports */
+    height: calc(100vh - 56px);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .radar-screen.real-map-mode {
+    flex: 1; /* Retain flex scaling to occupy the upper majority aspect ratios */
+    width: 100%;
+    height: auto;
+  }
+
+  /* Reposition the floating status panel slightly lower to dodge zoom toggles */
+  .radar-status-overlay {
+    top: 10px;
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  /* Convert the right-docked card into an adaptive structural drawer footer */
+  .radar-spec-drawer {
+    width: 100%;
+    height: 140px; /* Short structural height when resting */
+    padding: 12px;
+    border-color: #334155;
+  }
+
+  /* Expand panels slightly when tracking an aircraft actively */
+  .radar-spec-drawer.drawer-active {
+    height: 220px; 
+  }
+
+  .spec-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Split items evenly inside matrix paths on mobile */
+    gap: 8px;
+  }
+
+  .spec-card h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .spec-divider {
+    margin-bottom: 8px;
+  }
+
+  .dismiss-btn {
+    margin-top: 10px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .spec-placeholder .hint {
+    display: none; /* Collapse helper hints on mobile windows to preserve vertical space */
+  }
 }
