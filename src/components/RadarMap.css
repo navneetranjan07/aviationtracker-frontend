@@ -1,181 +1,137 @@
+/* Core Layout Container */
 .radar-dashboard-container {
   display: flex;
-  gap: 25px;
-  background-color: #060b13;
-  padding: 25px;
-  border-radius: 12px;
-  color: #00ffcc;
-  font-family: 'Courier New', Courier, monospace;
-  max-width: 1000px;
-  margin: 20px auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  width: 100%;
+  height: calc(100vh - 80px); /* Adjust based on your header's true layout height */
+  background-color: #0b0f19;
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-
-.radar-screen {
-  position: relative;
-  width: 550px;
-  height: 550px;
-  background-color: #03070d;
-  border: 2px solid #004433;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: inset 0 0 50px rgba(0, 255, 204, 0.1), 0 0 15px rgba(0, 255, 204, 0.05);
-}
-
-.radar-sweep-line {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  background: linear-gradient(45deg, rgba(0, 255, 204, 0.25) 0%, transparent 70%);
-  transform-origin: bottom right;
-  top: 0;
-  left: 0;
-  animation: radar-spin 5s linear infinite;
-  z-index: 1;
-  pointer-events: none;
-}
-
-@keyframes radar-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.radar-concentric-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgba(0, 255, 170, 0.12);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.ring-1 { width: 30%; height: 30%; }
-.ring-2 { width: 60%; height: 60%; }
-.ring-3 { width: 90%; height: 90%; }
-
-.radar-status-msg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-size: 13px;
-  color: #00cc99;
-  width: 80%;
-  z-index: 5;
-}
-.error-msg { color: #ff3366; }
-
-.radar-plane-blip {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.2s ease;
-}
-.radar-plane-blip:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-}
-
-.plane-icon-svg {
-  width: 22px;
-  height: 22px;
-  fill: #00ffaa;
-  filter: drop-shadow(0 0 4px #00ffaa);
-  transition: fill 0.3s ease;
-}
-
-.blip-label {
-  font-size: 9px;
-  color: rgba(0, 255, 204, 0.85);
-  margin-top: 3px;
-  background-color: rgba(3, 7, 13, 0.85);
-  padding: 1px 4px;
-  border-radius: 3px;
-  border: 1px solid rgba(0, 255, 170, 0.2);
-  white-space: nowrap;
-}
-
-.radar-plane-blip.targeted .plane-icon-svg {
-  fill: #ff3366;
-  filter: drop-shadow(0 0 10px #ff3366);
-}
-.radar-plane-blip.targeted .blip-label {
-  color: #ff3366;
-  border-color: rgba(255, 51, 102, 0.4);
-  font-weight: bold;
-}
-
-.radar-spec-drawer {
+/* 1. Force the map container to take all space on the left and never collapse to 0px */
+.radar-screen.real-map-mode {
   flex: 1;
-  background-color: #0a101a;
-  border: 1px solid #004433;
+  position: relative;
+  height: 100% !important;
+  background: #090d14;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 2. Critical: Force the Map engine container and inner elements to render completely */
+.leaflet-map-viewport,
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  z-index: 1;
+  background-color: #090d14 !important;
+}
+
+/* Marker Styling Framework Fixes */
+.custom-radar-plane-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Connection / Error HUD Alerts */
+.radar-status-overlay {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 15, 26, 0.9);
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 1000;
+  font-family: monospace;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.radar-status-overlay.error-msg {
+  border-color: #ff3366;
+  color: #ff3366;
+}
+
+/* Side Drawer Specifications View */
+.radar-spec-drawer {
+  width: 320px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
   border-radius: 8px;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  box-sizing: border-box;
+  color: #f8fafc;
 }
 
 .spec-card h3 {
-  margin: 0 0 5px 0;
-  color: #ffffff;
-  font-size: 16px;
-  letter-spacing: 1px;
+  color: #00ffcc;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
 }
 
 .spec-divider {
   border: 0;
-  border-top: 1px solid #00ffaa;
-  margin-bottom: 15px;
+  border-top: 1px solid #1e293b;
+  margin-bottom: 16px;
 }
 
 .spec-row {
-  margin: 12px 0;
-  font-size: 14px;
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px dashed rgba(0, 255, 170, 0.05);
-  padding-bottom: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-family: monospace;
 }
 
 .badge-live {
-  background-color: rgba(255, 51, 102, 0.15);
-  color: #ff3366;
-  padding: 1px 6px;
+  background: rgba(0, 255, 204, 0.1);
+  color: #00ffcc;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 10px;
-  font-weight: bold;
-  border: 1px solid rgba(255, 51, 102, 0.3);
+  font-size: 11px;
 }
 
 .dismiss-btn {
-  background-color: transparent;
-  border: 1px solid #ff3366;
-  color: #ff3366;
-  padding: 8px 12px;
-  cursor: pointer;
-  margin-top: 15px;
-  font-family: inherit;
-  transition: all 0.2s ease;
+  margin-top: 20px;
+  width: 100%;
+  background: #ff3366;
+  color: white;
+  border: none;
+  padding: 10px;
   border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
 }
+
 .dismiss-btn:hover {
-  background-color: #ff3366;
-  color: #ffffff;
+  background: #e11d48;
 }
 
 .spec-placeholder {
+  color: #64748b;
+  font-family: monospace;
   text-align: center;
-  color: rgba(0, 255, 204, 0.5);
-  font-size: 13px;
-  line-height: 1.6;
+  margin: auto 0;
 }
+
 .spec-placeholder .hint {
-  font-size: 11px;
-  color: rgba(0, 255, 204, 0.35);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* Leaflet Map Text Color Readability Corrections */
+.map-tooltip-popup {
+  font-family: monospace;
+  color: #0f172a;
 }
