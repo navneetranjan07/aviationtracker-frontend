@@ -4,14 +4,12 @@ import AirportBoard from './components/AirportBoard';
 import FlightTracker from './components/FlightTracker';
 
 export default function App() {
-  // 1. Core State Control
-  const [activeTab, setActiveTab] = useState('radar'); // 'radar' | 'boards' | 'track'
+  const [activeTab, setActiveTab] = useState('radar');
   const [globalSelectedFlight, setGlobalSelectedFlight] = useState('');
 
-  // 2. Action handler to redirect from Airport Boards to Flight Tracker smoothly
   const handleTrackFlightFromBoard = (flightNum) => {
-    setGlobalSelectedFlight(flightNum); // Hydrates the shared state variable
-    setActiveTab('track');              // Switches view focus instantly to Lookup screen
+    setGlobalSelectedFlight(flightNum);
+    setActiveTab('track');
   };
 
   return (

@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { formatLocalTime } from '../utils/formatTime';
 import { API_BASE } from '../config';
 
-// 🚀 Pass selectedFlightNumber and clearSelectedFlight from parent App.jsx
 export default function FlightTracker({ selectedFlightNumber, clearSelectedFlight }) {
   const [flightNumber, setFlightNumber] = useState('');
   const [flightData, setFlightData] = useState(null);
   const [flightLoading, setFlightLoading] = useState(false);
   const [flightError, setFlightError] = useState('');
 
-  // 🚀 Isolated core search function so it can be called programmatically or via form submission
   const executeSearch = async (targetFlightNum) => {
     if (!targetFlightNum.trim()) return;
 
@@ -36,15 +34,12 @@ export default function FlightTracker({ selectedFlightNumber, clearSelectedFligh
     executeSearch(flightNumber);
   };
 
-  // 🚀 AUTOMATIC OBSERVER WATCHER
-  // Fired instantly when redirected from the Airport Board layout tab
   useEffect(() => {
     if (selectedFlightNumber) {
-      setFlightNumber(selectedFlightNumber); // Autofills the text input field
-      executeSearch(selectedFlightNumber);   // Automatically executes backend search query
+      setFlightNumber(selectedFlightNumber); 
+      executeSearch(selectedFlightNumber); 
     }
 
-    // Optional cleanup: resets the selection token when navigating away
     return () => {
       if (clearSelectedFlight) clearSelectedFlight();
     };

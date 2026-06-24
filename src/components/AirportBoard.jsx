@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { formatLocalTime } from '../utils/formatTime';
 import { API_BASE } from '../config';
 
-// 🚀 Accept onTrackFlight as a prop from your parent component to manage view changes
 export default function AirportBoard({ onTrackFlight }) {
   const [airportIata, setAirportIata] = useState('');
   const [boardType, setBoardType] = useState('dep_iata');
@@ -110,7 +109,6 @@ export default function AirportBoard({ onTrackFlight }) {
                 {((boardType === 'dep_iata' ? boardData.departures : boardData.arrivals) || []).map((item, idx) => (
                   <tr 
                     key={idx} 
-                    // 🚀 Added cursor pointer and onClick action to initiate tracking redirect 
                     className="hover:bg-sky-500/10 active:bg-sky-600/20 cursor-pointer transition-colors group"
                     onClick={() => {
                       if (onTrackFlight && item.flightNumber) {

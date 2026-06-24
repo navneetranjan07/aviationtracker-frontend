@@ -27,7 +27,6 @@ export default function RadarMap() {
   }, []);
 
   const convertCoordinatesToPercent = (lat, lon) => {
-    // Spatial configuration values matching your Spring Boot geographical limits
     const minLat = 8.0;
     const maxLat = 30.0;
     const minLon = 70.0;
