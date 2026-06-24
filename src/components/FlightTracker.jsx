@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatLocalTime } from '../utils/formatTime';
 import { API_BASE } from '../config';
 
-export default function FlightTracker() {
+// 🚀 Pass selectedFlightNumber and clearSelectedFlight from parent App.jsx
+export default function FlightTracker({ selectedFlightNumber, clearSelectedFlight }) {
   const [flightNumber, setFlightNumber] = useState('');
   const [flightData, setFlightData] = useState(null);
   const [flightLoading, setFlightLoading] = useState(false);
   const [flightError, setFlightError] = useState('');
 
-
-  const handleTrackFlight = async (e) => {
-    e.preventDefault();
-    if (!flightNumber.trim()) return;
+  // 🚀 Isolated core search function so it can be called programmatically or via form submission
+  const executeSearch = async (targetFlightNum) => {
+    if (!targetFlightNum.trim()) return;
 
     setFlightLoading(true);
     setFlightError('');
     setFlightData(null);
 
     try {
-      const response = await fetch(`${API_BASE}/flights/${flightNumber.trim().toUpperCase()}`);
+      const response = await fetch(`${API_BASE}/flights/${targetFlightNum.trim().toUpperCase()}`);
       if (!response.ok) {
         throw new Error('Flight not found or an error occurred.');
       }
@@ -30,6 +30,25 @@ export default function FlightTracker() {
       setFlightLoading(false);
     }
   };
+
+  const handleTrackFlight = (e) => {
+    e.preventDefault();
+    executeSearch(flightNumber);
+  };
+
+  // 🚀 AUTOMATIC OBSERVER WATCHER
+  // Fired instantly when redirected from the Airport Board layout tab
+  useEffect(() => {
+    if (selectedFlightNumber) {
+      setFlightNumber(selectedFlightNumber); // Autofills the text input field
+      executeSearch(selectedFlightNumber);   // Automatically executes backend search query
+    }
+
+    // Optional cleanup: resets the selection token when navigating away
+    return () => {
+      if (clearSelectedFlight) clearSelectedFlight();
+    };
+  }, [selectedFlightNumber]);
 
   return (
     <div className="space-y-6">

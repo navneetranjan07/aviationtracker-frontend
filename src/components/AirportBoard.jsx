@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { formatLocalTime } from '../utils/formatTime';
 import { API_BASE } from '../config';
 
-export default function AirportBoard() {
+// 🚀 Accept onTrackFlight as a prop from your parent component to manage view changes
+export default function AirportBoard({ onTrackFlight }) {
   const [airportIata, setAirportIata] = useState('');
   const [boardType, setBoardType] = useState('dep_iata');
   const [boardData, setBoardData] = useState(null);
@@ -16,7 +17,6 @@ export default function AirportBoard() {
     setBoardLoading(true);
     setBoardError('');
     setBoardData(null);
-
 
     try {
       const response = await fetch(
@@ -91,6 +91,7 @@ export default function AirportBoard() {
             <h3 className="text-lg font-bold text-white tracking-wide">
               Live Schedule for {boardData.airportCode} — {boardType === 'dep_iata' ? '🛫 Departures' : '🛬 Arrivals'}
             </h3>
+            <span className="text-xs text-slate-400 font-medium">💡 Click any row to view full radar telemetry mapping</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -107,8 +108,20 @@ export default function AirportBoard() {
               </thead>
               <tbody className="divide-y divide-slate-700/50">
                 {((boardType === 'dep_iata' ? boardData.departures : boardData.arrivals) || []).map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-700/20 transition-colors">
-                    <td className="px-6 py-4 font-bold text-white tracking-wide">{item.flightNumber}</td>
+                  <tr 
+                    key={idx} 
+                    // 🚀 Added cursor pointer and onClick action to initiate tracking redirect 
+                    className="hover:bg-sky-500/10 active:bg-sky-600/20 cursor-pointer transition-colors group"
+                    onClick={() => {
+                      if (onTrackFlight && item.flightNumber) {
+                        onTrackFlight(item.flightNumber);
+                      }
+                    }}
+                  >
+                    {/* Highlight flight number text on hover */}
+                    <td className="px-6 py-4 font-bold text-white tracking-wide group-hover:text-sky-400 transition-colors">
+                      {item.flightNumber}
+                    </td>
                     <td className="px-6 py-4">{item.airline}</td>
                     <td className="px-6 py-4">
                       <span className="font-mono bg-slate-900/60 px-1.5 py-0.5 rounded text-sky-400 mr-2 font-bold">{item.counterCity}</span>
